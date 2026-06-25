@@ -7,6 +7,77 @@ Small **static** marketing + legal pages for [Stamped](https://github.com/). No 
 - **`assets/logo.png`** — Mark resized from the app splash asset (`app/assets/images/splash-logo-light.png`). Re-copy and re-run `sips -Z 160 …` if the master artwork changes.
 - **`assets/styles.css`** — Site styles.
 
+## Join from cafe QR (planned — Phase U)
+
+Acquisition join flow will live **on this same static site** (HTML + minimal JS, Supabase **anon** key only in the browser — **never** the service role). Locked product/engineering tasks live in the app repo: `my_requirements/tasks/task-93-…` through `task-97-…` and **Phase U** in `my_requirements/tasks/TASKS_STATUS.md`.
+
+### Join route (Task 94)
+
+- **Path**: `/join` → `join/index.html`
+- **QR payload** (from spec): `https://<marketing-host>/join?t=<cafe_token>`
+- **JS entry**: `assets/join.js` (live join flow: resolves token, email OTP, profile upsert, attach card)
+
+### Public config (Supabase anon only)
+
+The join page requires **two public values**:
+
+- `SUPABASE_URL`
+- `SUPABASE_ANON_KEY`
+
+These are injected into **`assets/config.js`**.
+
+**Rules:**
+
+- Only publish the **anon** key. **Never** publish the **service role** key.
+- Treat `assets/config.js` as a generated file (deploy-time).
+
+#### GitHub Pages workflow (recommended)
+
+Set repository **Actions secrets**:
+
+- `SUPABASE_URL`
+- `SUPABASE_ANON_KEY`
+
+The workflow generates `assets/config.js` during deploy.
+
+#### Local testing
+
+Copy the example file:
+
+```bash
+cp assets/config.example.js assets/config.js
+```
+
+Then edit `assets/config.js` with your Supabase URL + anon key.
+
+### Backend prerequisite (Task 95)
+
+The join page resolves the cafe token before auth via an anon-safe RPC:
+
+- `verify_cafe_qr_public(p_token text)` (granted to `anon`)
+
+And after OTP verification it attaches the card via:
+
+- `find_or_create_customer_card(p_customer_id, p_brand_id, p_cafe_id)` (authenticated)
+
+### Supabase settings checklist (marketing origin)
+
+In the Supabase dashboard (Authentication / URL configuration):
+
+- **Site URL**: set to your production marketing origin (e.g. `https://stamped.umair.au`)
+- **Additional Redirect URLs**: include:
+  - `https://stamped.umair.au/*`
+  - `http://localhost:*/*` (optional for local testing)
+
+If you use Edge Functions for any join endpoints, ensure their CORS handling allows the marketing origin.
+
+### Staging (QA)
+
+Simplest approach: create a second GitHub Pages repo like `stamped-site-staging` and deploy this same folder there.
+
+- Staging URL example: `https://YOUR_USER.github.io/stamped-site-staging/`
+- Use a separate Supabase project or separate OAuth redirect allowlist entries (recommended).
+
 ## Pages
 
 | Path | File |
@@ -14,6 +85,7 @@ Small **static** marketing + legal pages for [Stamped](https://github.com/). No 
 | `/` | `index.html` |
 | `/privacy/` | `privacy/index.html` |
 | `/terms/` | `terms/index.html` |
+| `/join/` | `join/index.html` |
 
 The mobile app expects these URLs (see `app/src/constants/appLinks.ts`):
 

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Stamped — Join</title>
+    <meta name="description" content="Join Stamped from a cafe QR code." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../assets/styles.css" />
+    <link rel="icon" href="../assets/logo.png" type="image/png" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="site-header__inner">
+        <a class="logo" href="../" aria-label="Stamped home">
+          <img class="logo__mark" src="../assets/logo.png" width="160" height="160" alt="" />
+          <span class="logo__word">Stamped</span>
+        </a>
+        <nav class="nav" aria-label="Legal">
+          <a href="../privacy/">Privacy</a>
+          <a href="../terms/">Terms</a>
+          <a href="mailto:hello@umair.au?subject=Stamped%20support">Support</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section>
+        <h1 class="doc-title">Join</h1>
+        <p class="doc-meta" id="join-subtitle">Loading…</p>
+        <div id="join-root"></div>
+      </section>
+    </main>
+
+    <!--
+      Generated at deploy time (GitHub Actions) or provided locally.
+      Must contain ONLY SUPABASE_URL + SUPABASE_ANON_KEY.
+    -->
+    <script src="../assets/config.js"></script>
+    <script type="module" src="../assets/join.js"></script>
+  </body>
+</html>
+

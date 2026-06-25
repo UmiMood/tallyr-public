@@ -27,6 +27,35 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Generate public config (Supabase anon)
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          mkdir -p assets
+          python3 - <<'PY'
+          import os
+
+          supabase_url = os.environ.get("SUPABASE_URL", "").strip()
+          supabase_anon_key = os.environ.get("SUPABASE_ANON_KEY", "").strip()
+
+          if not supabase_url or not supabase_anon_key:
+            print("Missing SUPABASE_URL or SUPABASE_ANON_KEY secrets.")
+            print("Generating placeholder assets/config.js (site will show setup required).")
+            supabase_url = ""
+            supabase_anon_key = ""
+
+          content = (
+            "window.STAMPED_PUBLIC_CONFIG = {\n"
+            f"  SUPABASE_URL: {supabase_url!r},\n"
+            f"  SUPABASE_ANON_KEY: {supabase_anon_key!r},\n"
+            "};\n"
+          )
+
+          with open("assets/config.js", "w", encoding="utf-8") as f:
+            f.write(content)
+          PY
+
       - name: Collect site (exclude .github from published files)
         run: |
           mkdir -p out
