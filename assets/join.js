@@ -303,7 +303,8 @@ async function main() {
       });
       if (cardRes.error) throw cardRes.error;
 
-      state.customerCardId = cardRes.data ?? null;
+      const cardRow = Array.isArray(cardRes.data) ? cardRes.data[0] : cardRes.data;
+      state.customerCardId = cardRow?.id ?? null;
 
       hide('step-otp');
       show('step-success');
