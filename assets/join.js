@@ -1,3 +1,12 @@
+// Update these when the apps are live in the stores.
+const APP_STORE_URL = 'https://apps.apple.com/app/stamped/id0000000000';
+const PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=au.umair.stamped';
+
+function isIosSafari() {
+  const ua = navigator.userAgent;
+  return /iP(hone|ad|od)/i.test(ua) && /Safari/i.test(ua) && !/CriOS|FxiOS|EdgiOS/i.test(ua);
+}
+
 function escapeHtml(v) {
   return String(v).replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
 }
@@ -93,12 +102,12 @@ async function main() {
 
   const token = getTokenFromUrl();
   if (!token) {
-    renderError('Missing code.', 'Please scan the cafe QR code again or ask staff for help.');
+    renderError('Missing code.', 'Please scan the QR code again or ask staff for help.');
     return;
   }
 
-  setSubtitle('Loading cafe…');
-  setRoot(`<div class="card stack"><p class="muted">Checking the cafe code…</p></div>`);
+  setSubtitle('Loading…');
+  setRoot(`<div class="card stack"><p class="muted">Checking the code…</p></div>`);
 
   const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');
   const supabase = createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY);
@@ -106,18 +115,18 @@ async function main() {
   // 1) Public cafe resolution (anon-safe)
   const cafeRes = await supabase.rpc('verify_cafe_qr_public', { p_token: token });
   if (cafeRes.error) {
-    renderError('Invalid code.', 'This cafe code is invalid or expired. Please ask staff for a new code.');
+    renderError('Invalid code.', 'This code is invalid or expired. Please ask staff for a new code.');
     return;
   }
   const cafe = Array.isArray(cafeRes.data) ? cafeRes.data[0] : cafeRes.data;
   if (!cafe?.brand_id || !cafe?.cafe_id) {
-    renderError('Invalid code.', 'This cafe code could not be resolved. Please ask staff for help.');
+    renderError('Invalid code.', 'This code could not be resolved. Please ask staff for help.');
     return;
   }
 
   const cafeTitle = cafe?.brand_name
     ? `${cafe.brand_name}${cafe.cafe_name ? ` — ${cafe.cafe_name}` : ''}`
-    : cafe?.cafe_name || 'Your cafe';
+    : cafe?.cafe_name || 'This venue';
 
   // 2) Render signup
   setSubtitle(`Joining ${cafeTitle}`);
@@ -181,14 +190,7 @@ async function main() {
       </div>
     </div>
 
-    <div class="card stack" id="step-success" style="display:none;">
-      <p><strong>You’re in.</strong></p>
-      <p class="muted">Your loyalty card is ready. Next: Add to Apple Wallet (coming in Task 97) or download the app.</p>
-      <div class="row">
-        <a class="btn btn--primary" href="../">Done</a>
-        <a class="btn btn--secondary" href="../">Download the app</a>
-      </div>
-    </div>
+    <div class="card stack" id="step-success" style="display:none;"></div>
   `);
 
   const $ = (id) => document.getElementById(id);
@@ -301,8 +303,11 @@ async function main() {
       });
       if (cardRes.error) throw cardRes.error;
 
+      state.customerCardId = cardRes.data ?? null;
+
       hide('step-otp');
       show('step-success');
+      renderSuccess(cafeTitle, state.customerCardId);
     } catch (err) {
       setOtpError(String(err?.message ?? err));
     }
@@ -319,6 +324,75 @@ async function main() {
       if (error) throw error;
     } catch (err) {
       setOtpError(String(err?.message ?? err));
+    }
+  }
+
+  function renderSuccess(title, customerCardId) {
+    const onIos = isIosSafari();
+    const walletSection = onIos && customerCardId
+      ? `<button class="btn btn--primary" id="wallet-btn" type="button">Add to Apple Wallet</button>
+         <p class="muted" id="wallet-msg" style="display:none;margin:0;"></p>`
+      : '';
+    $('step-success').innerHTML = `
+      <p><strong>You're in!</strong></p>
+      <p class="muted">Your ${escapeHtml(title)} loyalty card is ready. Collect stamps every visit — your reward is waiting.</p>
+      ${walletSection}
+      <p class="muted" style="margin-bottom:0.25rem;">Get the full app to manage all your cards:</p>
+      <div class="row">
+        <a class="btn btn--primary" href="${escapeHtml(APP_STORE_URL)}" target="_blank" rel="noopener">App Store</a>
+        <a class="btn btn--secondary" href="${escapeHtml(PLAY_STORE_URL)}" target="_blank" rel="noopener">Google Play</a>
+      </div>
+    `;
+    if (onIos && customerCardId) {
+      $('wallet-btn').addEventListener('click', () => void addToWallet(customerCardId));
+    }
+  }
+
+  async function addToWallet(customerCardId) {
+    const btn = $('wallet-btn');
+    const msg = $('wallet-msg');
+    if (btn) { btn.disabled = true; btn.textContent = 'Adding…'; }
+    try {
+      const { data: sessionResp } = await supabase.auth.getSession();
+      const jwt = sessionResp?.session?.access_token;
+      if (!jwt) throw new Error('Session expired. Please refresh and sign in again.');
+
+      const fnUrl = `${cfg.SUPABASE_URL.replace(/\/$/, '')}/functions/v1/wallet_pass/issue`;
+      const res = await fetch(fnUrl, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${jwt}`,
+          'Content-Type': 'application/json',
+          Accept: 'application/vnd.apple.pkpass, application/json',
+        },
+        body: JSON.stringify({ customerCardId }),
+      });
+
+      const ct = res.headers.get('Content-Type') ?? '';
+      if (ct.includes('application/vnd.apple.pkpass') && res.ok) {
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'stamped.pkpass';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(url), 10000);
+        if (btn) btn.style.display = 'none';
+      } else {
+        let code = `http_${res.status}`;
+        try { const j = await res.json(); code = j?.code ?? code; } catch { /* ignore */ }
+        if (code === 'pkpass_certs_missing' || code === 'pkpass_signing_not_configured') {
+          if (msg) { msg.style.display = ''; msg.textContent = 'Wallet passes are not yet configured. Download the app to manage your card.'; }
+          if (btn) btn.style.display = 'none';
+        } else {
+          throw new Error(`Could not generate pass (${code}).`);
+        }
+      }
+    } catch (err) {
+      if (msg) { msg.style.display = ''; msg.textContent = String(err?.message ?? err); }
+      if (btn) { btn.disabled = false; btn.textContent = 'Add to Apple Wallet'; }
     }
   }
 
