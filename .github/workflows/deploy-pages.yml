@@ -46,7 +46,7 @@ jobs:
             supabase_anon_key = ""
 
           content = (
-            "window.STAMPED_PUBLIC_CONFIG = {\n"
+            "window.TALLYR_PUBLIC_CONFIG = {\n"
             f"  SUPABASE_URL: {supabase_url!r},\n"
             f"  SUPABASE_ANON_KEY: {supabase_anon_key!r},\n"
             "};\n"

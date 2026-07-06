@@ -1,5 +1,5 @@
 // Update these when the apps are live in the stores.
-const APP_STORE_URL = 'https://apps.apple.com/app/stamped/id0000000000';
+const APP_STORE_URL = 'https://apps.apple.com/app/tallyr/id0000000000';
 const PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=au.umair.stamped';
 
 function isIosSafari() {
@@ -37,10 +37,10 @@ function normalizeUrlToCanonicalIfNeeded() {
 }
 
 function requirePublicConfig() {
-  const cfg = window.STAMPED_PUBLIC_CONFIG;
+  const cfg = window.TALLYR_PUBLIC_CONFIG;
   if (!cfg?.SUPABASE_URL || !cfg?.SUPABASE_ANON_KEY) {
     throw new Error(
-      'Missing STAMPED_PUBLIC_CONFIG. Ensure assets/config.js exists and contains SUPABASE_URL + SUPABASE_ANON_KEY.'
+      'Missing TALLYR_PUBLIC_CONFIG. Ensure assets/config.js exists and contains SUPABASE_URL + SUPABASE_ANON_KEY.'
     );
   }
   return cfg;
@@ -133,7 +133,7 @@ async function main() {
 
   setRoot(`
     <div class="card stack" id="step-form">
-      <p class="muted">Create your Stamped account to start collecting stamps.</p>
+      <p class="muted">Create your Tallyr account to start collecting stamps.</p>
 
       <div class="field">
         <label for="name">Full name</label>
@@ -163,7 +163,7 @@ async function main() {
 
       <label class="checkbox">
         <input id="marketing-opt-in" type="checkbox" />
-        <span>Send me offers and updates from Stamped (optional).</span>
+        <span>Send me offers and updates from Tallyr (optional).</span>
       </label>
 
       <p class="error" id="form-error" style="display:none;"></p>
@@ -375,7 +375,7 @@ async function main() {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = 'stamped.pkpass';
+        a.download = 'tallyr.pkpass';
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);

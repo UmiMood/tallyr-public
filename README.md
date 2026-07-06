@@ -1,6 +1,6 @@
-# Stamped — public static site
+# Tallyr — public static site
 
-Small **static** marketing + legal pages for [Stamped](https://github.com/). No build step: plain HTML + CSS.
+Small **static** marketing + legal pages for [Tallyr](https://github.com/). No build step: plain HTML + CSS.
 
 ## Assets
 
@@ -118,7 +118,7 @@ Your Expo app git repo is only `app/`; **`public/` is usually its own GitHub rep
    cd /Users/umair/coffeeloyalty/public
    git init
    git add -A
-   git commit -m "Initial Stamped static site"
+   git commit -m "Initial Tallyr static site"
    git branch -M main
    git remote add origin https://github.com/YOUR_USER/stamped-site.git
    git push -u origin main
@@ -151,4 +151,4 @@ root /var/www/stamped-public;
 try_files $uri $uri/ $uri.html =404;
 ```
 
-Support email in pages: **hello@umair.au** (same as `SUPPORT_EMAIL` in the app).
+Support email in pages: **info@tallyr.com.au** (same as `SUPPORT_EMAIL` in the app).

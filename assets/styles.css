@@ -1,15 +1,15 @@
-/* Stamped — static legal site. Aligns with app shell tokens (warm light-first). */
+/* Tallyr — static legal site. Aligns with app shell tokens (calm petrol, light-first). */
 
 :root {
-  --bg: #fbf7f2;
+  --bg: #f6f8f8;
   --surface: #ffffff;
-  --text: #2b1d14;
-  --text-secondary: #7a6a5c;
-  --text-muted: #a89a8c;
-  --accent: #c47b3b;
-  --accent-pressed: #a8682f;
-  --border: #e8dfd2;
-  --font-serif: 'Fraunces', Georgia, 'Times New Roman', serif;
+  --text: #14181c;
+  --text-secondary: #5c6b6e;
+  --text-muted: #8c9a9c;
+  --accent: #0c6e72;
+  --accent-pressed: #095458;
+  --border: #dde6e6;
+  --font-serif: 'Quicksand', system-ui, -apple-system, sans-serif;
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
   --space: 1rem;
   --radius: 12px;
@@ -271,8 +271,8 @@ ul.lead li {
 
 .field input:focus {
   outline: none;
-  border-color: rgba(196, 123, 59, 0.55);
-  box-shadow: 0 0 0 4px rgba(196, 123, 59, 0.12);
+  border-color: rgba(12, 110, 114, 0.55);
+  box-shadow: 0 0 0 4px rgba(12, 110, 114, 0.12);
 }
 
 .muted {
@@ -281,7 +281,7 @@ ul.lead li {
 }
 
 .error {
-  color: #9b3f2b;
+  color: #a83e40;
   font-weight: 600;
 }
 
