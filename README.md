@@ -7,76 +7,33 @@ Small **static** marketing + legal pages for [Tallyr](https://github.com/). No b
 - **`assets/logo.png`** — Mark resized from the app splash asset (`app/assets/images/splash-logo-light.png`). Re-copy and re-run `sips -Z 160 …` if the master artwork changes.
 - **`assets/styles.css`** — Site styles.
 
-## Join from cafe QR (planned — Phase U)
+## Join from cafe QR (Expo web app — Phase Y)
 
-Acquisition join flow will live **on this same static site** (HTML + minimal JS, Supabase **anon** key only in the browser — **never** the service role). Locked product/engineering tasks live in the app repo: `my_requirements/tasks/task-93-…` through `task-97-…` and **Phase U** in `my_requirements/tasks/TASKS_STATUS.md`.
+Cafe poster QRs open the **Expo web app** join route (not a static JS signup on this site):
 
-### Join route (Task 94)
+- **Canonical URL:** `https://app.tallyr.com.au/join?t=<cafe_token>`
+- **Legacy marketing URL:** `https://tallyr.com.au/join?t=<cafe_token>` → redirects to the app (see `join/index.html`)
 
-- **Path**: `/join` → `join/index.html`
-- **QR payload** (from spec): `https://<marketing-host>/join?t=<cafe_token>`
-- **JS entry**: `assets/join.js` (live join flow: resolves token, email OTP, profile upsert, attach card)
+Implementation lives in the app repo: `src/app/join.tsx`, `src/features/join/`. Tasks **105–109** in `my_requirements/tasks/TASKS_STATUS.md`.
 
-### Public config (Supabase anon only)
+### This site (`public/`)
 
-The join page requires **two public values**:
+- **`join/index.html`** — redirect-only; forwards `?t=` to `app.tallyr.com.au/join`.
+- **`assets/join.js`** — removed (Task 109); join is handled by the Expo web export.
 
-- `SUPABASE_URL`
-- `SUPABASE_ANON_KEY`
+### Backend (unchanged)
 
-These are injected into **`assets/config.js`**.
+Pre-auth token resolve still uses anon-safe RPC `verify_cafe_qr_public(p_token text)`. Post-auth card attach uses `find_or_create_customer_card` in the app.
 
-**Rules:**
-
-- Only publish the **anon** key. **Never** publish the **service role** key.
-- Treat `assets/config.js` as a generated file (deploy-time).
-
-#### GitHub Pages workflow (recommended)
-
-Set repository **Actions secrets**:
-
-- `SUPABASE_URL`
-- `SUPABASE_ANON_KEY`
-
-The workflow generates `assets/config.js` during deploy.
-
-#### Local testing
-
-Copy the example file:
-
-```bash
-cp assets/config.example.js assets/config.js
-```
-
-Then edit `assets/config.js` with your Supabase URL + anon key.
-
-### Backend prerequisite (Task 95)
-
-The join page resolves the cafe token before auth via an anon-safe RPC:
-
-- `verify_cafe_qr_public(p_token text)` (granted to `anon`)
-
-And after OTP verification it attaches the card via:
-
-- `find_or_create_customer_card(p_customer_id, p_brand_id, p_cafe_id)` (authenticated)
-
-### Supabase settings checklist (marketing origin)
+### Supabase settings checklist
 
 In the Supabase dashboard (Authentication / URL configuration):
 
-- **Site URL**: set to your production marketing origin (e.g. `https://stamped.umair.au`)
-- **Additional Redirect URLs**: include:
-  - `https://stamped.umair.au/*`
-  - `http://localhost:*/*` (optional for local testing)
-
-If you use Edge Functions for any join endpoints, ensure their CORS handling allows the marketing origin.
-
-### Staging (QA)
-
-Simplest approach: create a second GitHub Pages repo like `stamped-site-staging` and deploy this same folder there.
-
-- Staging URL example: `https://YOUR_USER.github.io/stamped-site-staging/`
-- Use a separate Supabase project or separate OAuth redirect allowlist entries (recommended).
+- **Site URL:** `https://app.tallyr.com.au` (Expo web app)
+- **Additional Redirect URLs:** include:
+  - `https://app.tallyr.com.au/**`
+  - `https://tallyr.com.au/**` (legacy marketing redirect)
+  - `http://localhost:*/*` (local dev)
 
 ## Pages
 
