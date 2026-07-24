@@ -10,8 +10,7 @@ Deployed to GitHub Pages via `.github/workflows/deploy-pages.yml`.
 | `/` | `index.html` |
 | `/contact` | `contact.html` |
 | `/privacy` | `privacy.html` |
-| `/terms` | `terms.html` |
-| `/refund` | `refund.html` |
+| `/terms` | `terms.html` (includes the Refund Policy at `#refund-policy`) |
 
 Pages are flat, self-contained HTML (fonts and assets are embedded). GitHub Pages
 serves `privacy.html` at `/privacy` (extensionless), so the mobile app's `/privacy`
